@@ -8,6 +8,7 @@ import (
 
 type IUserRepository interface {
 	CreateUser(ctx context.Context, user models.User) (int, error)
+	GetUser(ctx context.Context, email, password string) (models.User, error)
 }
 
 type Todolist interface {

@@ -11,6 +11,7 @@ type Todolist interface {
 
 type UserService interface {
 	CreateUser(ctx context.Context, user models.User) (int, error)
+	GenerateToken(tx context.Context, email, password string) (string, error)
 }
 
 type TodoItem interface {

@@ -26,3 +26,20 @@ func (u *UserRepository) CreateUser(ctx context.Context, user models.User) (int,
 	}
 	return id, nil
 }
+
+func (u *UserRepository) GetUser(ctx context.Context, username, passwordHash string) (models.User, error) {
+	var user models.User
+	query := fmt.Sprintf("SELECT id, username, email, password_hash FROM %s WHERE email = $1 AND password_hash = $2", TableName)
+	fmt.Printf("Query: %s\n", query)
+	fmt.Printf("Params: username='%s', passwordHash='%s'\n", username, passwordHash)
+	row := u.Pool.QueryRow(ctx, query, username, passwordHash)
+
+	err := row.Scan(
+		&user.Id,
+		&user.UserName,
+		&user.Email,
+		&user.Password,
+	)
+
+	return user, err
+}

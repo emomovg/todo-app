@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/emomovg/todo-app/internal/models"
 	"github.com/emomovg/todo-app/internal/repository"
+	"github.com/golang-jwt/jwt/v5"
 	"os"
+	"time"
 )
 
 type AuthService struct {
@@ -27,4 +29,21 @@ func generatePasswordHash(password string) string {
 	hash.Write([]byte(password))
 
 	return fmt.Sprintf("%x", hash.Sum([]byte(os.Getenv("HASH_SALT"))))
+}
+
+func (a *AuthService) GenerateToken(ctx context.Context, email, password string) (string, error) {
+	passwordHash := generatePasswordHash(password)
+	user, err := a.repo.GetUser(ctx, email, passwordHash)
+
+	if err != nil {
+		return "", err
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id":  user.Id,
+		"expireAt": time.Now().Add(time.Hour * 24).Unix(),
+		"issueAt":  time.Now().Unix(),
+	})
+
+	return token.SignedString([]byte(os.Getenv("JWT_KEY")))
 }
