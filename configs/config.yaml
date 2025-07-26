@@ -1,0 +1,13 @@
+port: "8082"
+
+db:
+  host: "localhost"
+  username: "localhost"
+  port: "5432"
+  password: "root"
+  DBName: "mydb"
+  SSLMode: "disable"
+  DBMAxCons: 30
+  DBMinCons: 5
+  DBMaxLifetime: "12"
+  DBMinLifetime: "2"
