@@ -6,7 +6,7 @@ import (
 )
 
 type Router struct {
-	service *services.Service
+	Service *services.Service
 }
 
 func (r *Router) InitRoutes() *gin.Engine {
@@ -18,12 +18,12 @@ func (r *Router) InitRoutes() *gin.Engine {
 		auth.POST("sign-in", r.signIn)
 	}
 
-	api := router.Group("api")
+	api := router.Group("api", r.validateAuth)
 	{
 		lists := api.Group("lists")
 		{
-			lists.POST("/", r.createList)
-			lists.GET("/", r.getAllLists)
+			lists.POST("", r.createList)
+			lists.GET("", r.getAllLists)
 			lists.GET("/:id", r.getListById)
 			lists.PUT("/:id", r.updateList)
 			lists.DELETE("/:id", r.deleteList)
@@ -44,5 +44,5 @@ func (r *Router) InitRoutes() *gin.Engine {
 }
 
 func NewRouter(service *services.Service) *Router {
-	return &Router{service: service}
+	return &Router{Service: service}
 }

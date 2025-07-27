@@ -27,7 +27,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	postres, err := db.New(ctx, db.PostgresConfig{
+	postgres, err := db.New(ctx, db.PostgresConfig{
 		Host:          viper.GetString("db.host"),
 		Port:          viper.GetInt("db.port"),
 		Username:      viper.GetString("db.username"),
@@ -42,10 +42,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to DB: %v", err)
 	}
-	defer postres.Close()
+	defer postgres.Close()
 
-	repo := repository.NewRepository(postres)
-	service := services.NewService(repo.IUserRepository)
+	repo := repository.NewRepository(postgres)
+	service := services.NewService(repo.IUserRepository, repo.Todolist)
 	router := routes.NewRouter(service)
 	handler := new(handler.Handler)
 

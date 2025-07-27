@@ -11,15 +11,13 @@ type UserRepository struct {
 	*db.Postgres
 }
 
-const TableName = "users"
-
 func NewUserRepository(db *db.Postgres) *UserRepository {
 	return &UserRepository{db}
 }
 
 func (u *UserRepository) CreateUser(ctx context.Context, user models.User) (int, error) {
 	var id int
-	query := fmt.Sprintf("INSERT INTO %s (username, email, password_hash) values ($1, $2, $3) RETURNING id", TableName)
+	query := fmt.Sprintf("INSERT INTO %s (username, email, password_hash) values ($1, $2, $3) RETURNING id", models.TableName)
 	row := u.Pool.QueryRow(ctx, query, user.UserName, user.Email, user.Password)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
@@ -29,9 +27,7 @@ func (u *UserRepository) CreateUser(ctx context.Context, user models.User) (int,
 
 func (u *UserRepository) GetUser(ctx context.Context, username, passwordHash string) (models.User, error) {
 	var user models.User
-	query := fmt.Sprintf("SELECT id, username, email, password_hash FROM %s WHERE email = $1 AND password_hash = $2", TableName)
-	fmt.Printf("Query: %s\n", query)
-	fmt.Printf("Params: username='%s', passwordHash='%s'\n", username, passwordHash)
+	query := fmt.Sprintf("SELECT id, username, email, password_hash FROM %s WHERE email = $1 AND password_hash = $2", models.TableName)
 	row := u.Pool.QueryRow(ctx, query, username, passwordHash)
 
 	err := row.Scan(

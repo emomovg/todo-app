@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"github.com/emomovg/todo-app/internal/models"
 	"github.com/emomovg/todo-app/internal/repository"
@@ -13,6 +14,11 @@ import (
 
 type AuthService struct {
 	repo repository.IUserRepository
+}
+
+type jwtClaims struct {
+	jwt.RegisteredClaims
+	UserID int `json:"user_id"`
 }
 
 func NewAuthService(repo repository.IUserRepository) *AuthService {
@@ -39,11 +45,32 @@ func (a *AuthService) GenerateToken(ctx context.Context, email, password string)
 		return "", err
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id":  user.Id,
-		"expireAt": time.Now().Add(time.Hour * 24).Unix(),
-		"issueAt":  time.Now().Unix(),
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwtClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+		UserID: user.Id,
 	})
 
 	return token.SignedString([]byte(os.Getenv("JWT_KEY")))
+}
+
+func (a *AuthService) ParseToken(ctx context.Context, accessToken string) (int, error) {
+	token, err := jwt.ParseWithClaims(accessToken, &jwtClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("invalid signing Method")
+		}
+		return []byte(os.Getenv("JWT_KEY")), nil
+	})
+
+	if err != nil {
+		return 0, nil
+	}
+	claims, ok := token.Claims.(*jwtClaims)
+	if !ok {
+		return 0, errors.New("token claims are not of type *jwtClaims")
+	}
+
+	return claims.UserID, nil
 }

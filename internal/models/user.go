@@ -1,5 +1,7 @@
 package models
 
+const TableName = "users"
+
 type User struct {
 	Id       int    `json:"-"`
 	UserName string `json:"username"`

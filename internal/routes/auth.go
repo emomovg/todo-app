@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"github.com/emomovg/todo-app/internal/models"
 	"github.com/emomovg/todo-app/internal/requests/user"
 	"github.com/gin-gonic/gin"
@@ -18,12 +19,12 @@ func (r *Router) signUp(ctx *gin.Context) {
 
 	user = req.ToUser()
 
-	id, err := r.service.UserService.CreateUser(ctx, *user)
+	id, err := r.Service.UserService.CreateUser(ctx, *user)
 	if err != nil {
 		NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-
+	fmt.Println(id)
 	ctx.JSON(http.StatusOK, map[string]interface{}{
 		"id": id,
 	})
@@ -36,7 +37,7 @@ func (r *Router) signIn(ctx *gin.Context) {
 		NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
-	token, err := r.service.UserService.GenerateToken(ctx, req.Email, req.Password)
+	token, err := r.Service.UserService.GenerateToken(ctx, req.Email, req.Password)
 
 	if err != nil {
 		NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())

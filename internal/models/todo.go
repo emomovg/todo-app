@@ -1,7 +1,14 @@
 package models
 
+const (
+	TodoListTable  = "todo_lists"
+	UserListTable  = "users_lists"
+	TodoItemTable  = "todo_items"
+	ListsItemTable = "lists_items"
+)
+
 type TodoList struct {
-	Id          int    `json:"-"`
+	Id          int    `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description""`
 }
